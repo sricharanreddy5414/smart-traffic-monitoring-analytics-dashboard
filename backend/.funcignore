@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+.local_data/
+local.settings.json
+.python_packages/
+__azurite_db*__.json
+AzuriteConfig
