@@ -105,8 +105,14 @@ Simulate Traffic Update posts to `/api/traffic/simulate`, then loads the three e
 
 ## 12. Azure deployment
 
-The intended cloud path is Static Web Apps for the React build and a Python Function App for the API. Cosmos DB holds the documents. Step-by-step portal instructions are in `docs/azure-deployment.md`. Deployment is not complete until those steps are done in your Azure account.
+The API is deployed as the Python 3.11 Function App `func-smart-traffic-dashboard` in resource group `rg-smart-traffic-dashboard` (Central India). It reads and writes Cosmos DB account `cosmos-smart-traffic`, database `TrafficDB`, container `TrafficData`, partition key `/location_id`. The public API root is `https://func-smart-traffic-dashboard.azurewebsites.net/api`. Health checks report `storage_mode` `cosmos-db` and `data_source` `simulated`.
+
+The React dashboard is built with `VITE_API_BASE_URL` set to that API root. It is hosted as an Azure Storage static website on `stsmarttrafficweb5414`. The public URL is `https://stsmarttrafficweb5414.z29.web.core.windows.net/`. Index and error documents are both `index.html`.
+
+Azure Static Web Apps could not be deployed because the Azure for Students subscription restricts resource creation to regions that are not supported by Azure Static Web Apps. Therefore, Azure Storage Static Website hosting is used for the React frontend. The Function App storage account `stsmarttraffic5414` is separate and is not the public website. The readings remain simulated academic data.
+
+Step-by-step notes and the region limit are in `docs/azure-deployment.md`.
 
 ## 13. GitHub Actions
 
-`.github/workflows/azure-deploy.yml` runs the Python unit tests and `npm run build` on every push and pull request. Deployment jobs run only on a push to `main` when the repository variable `DEPLOY_TO_AZURE` is `true`. Secrets are read from GitHub settings. They are not written in the workflow file.
+`.github/workflows/azure-deploy.yml` runs the Python unit tests and `npm run build` on every push and pull request. Deployment jobs run only on a push to `main` when the repository variable `DEPLOY_TO_AZURE` is `true`. The frontend job uploads the Vite build to the `$web` container of `stsmarttrafficweb5414`. The backend job publishes the Function App. Secrets are read from GitHub settings. They are not written in the workflow file.

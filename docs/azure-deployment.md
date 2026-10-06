@@ -1,8 +1,71 @@
 # Azure deployment
 
-Implementation of the application is in this repository. Deployment requires the student's Azure account and configuration. Creating the files does not create Azure resources and does not mean the site is already online.
+The backend and the public website are deployed. Traffic readings in Cosmos DB are simulated academic data, not live sensor data.
 
-Use the Azure portal for the main path. Azure CLI commands are included where they save time. Resource names that Azure must keep unique need a suffix. Write the final names in the table at the end of this file after you create them.
+Azure Static Web Apps could not be deployed because the Azure for Students subscription restricts resource creation to regions that are not supported by Azure Static Web Apps. Therefore, Azure Storage Static Website hosting is used for the React frontend.
+
+## Current deployment
+
+Subscription: Azure for Students. Tenant: Alliance University. Region used: Central India. That region is allowed by the subscription policy and supports Cosmos DB and Linux Functions.
+
+| Resource | Name | Region |
+| --- | --- | --- |
+| Resource group | `rg-smart-traffic-dashboard` | Central India |
+| Cosmos DB account | `cosmos-smart-traffic` | Central India, serverless |
+| Database | `TrafficDB` | |
+| Container | `TrafficData` | Partition key `/location_id` |
+| Function App | `func-smart-traffic-dashboard` | Central India, Linux, Python 3.11, Consumption |
+| Function API | `https://func-smart-traffic-dashboard.azurewebsites.net/api` | |
+| Function App storage | `stsmarttraffic5414` | Central India, Standard LRS. Required by Functions. Not the public website |
+| Frontend storage account | `stsmarttrafficweb5414` | Central India, Standard LRS, static website enabled |
+| Frontend URL | `https://stsmarttrafficweb5414.z29.web.core.windows.net/` | Index and 404 document: `index.html` |
+
+Verified API behaviour:
+
+- `GET /api/health` returns `storage_mode` `cosmos-db` and `data_source` `simulated`.
+- `GET /api/traffic`, `GET /api/traffic/analytics`, `GET /api/traffic/prediction`, and `GET /api/traffic/LOC001` return the simulated Bengaluru locations.
+- `POST /api/traffic/simulate` appends one new simulated reading per location.
+- The public website loads those responses, draws the charts and table, calculates congestion, refreshes, and can simulate an update that is stored in Cosmos DB.
+
+The container was seeded once from `data/sample_traffic_data.json` (78 readings). Later simulation added more readings. Do not run the seeder again.
+
+Function App settings `COSMOS_ENDPOINT`, `COSMOS_KEY`, `COSMOS_DATABASE`, and `COSMOS_CONTAINER` are stored in Azure application settings. They are not in source code. `COSMOS_DATABASE` is `TrafficDB`. `COSMOS_CONTAINER` is `TrafficData`.
+
+Platform CORS allows:
+
+- `https://stsmarttrafficweb5414.z29.web.core.windows.net`
+- `http://localhost:5173`
+- `http://localhost:4173`
+- `http://127.0.0.1:5173`
+- `http://127.0.0.1:4173`
+
+Do not switch this list to `*`.
+
+### Why the frontend is a Storage static website
+
+Azure Static Web Apps was not created. Creation was rejected in every relevant region, and no Static Web App resource was left behind.
+
+The subscription policy allows only Malaysia West, Southeast Asia, Austria East, UAE North, and Central India. Azure Static Web Apps can be created only in Central US, East US 2, West US 2, West Europe, and East Asia. There is no region that satisfies both.
+
+The public dashboard is the static website on `stsmarttrafficweb5414`. The Function App storage account `stsmarttraffic5414` was not changed.
+
+GitHub repository: `https://github.com/sricharanreddy5414/smart-traffic-monitoring-analytics-dashboard`
+
+Workflow: `.github/workflows/azure-deploy.yml`. The latest run on `main` completed the test job. Deploy jobs did not run.
+
+These Actions secrets exist and are not written in the repository:
+
+- `AZURE_FUNCTIONAPP_NAME`
+- `AZURE_FUNCTIONAPP_PUBLISH_PROFILE`
+- `AZURE_STORAGE_ACCOUNT`
+- `AZURE_STORAGE_KEY`
+- `VITE_API_BASE_URL` = `https://func-smart-traffic-dashboard.azurewebsites.net/api`
+
+The repository variable `DEPLOY_TO_AZURE` is not set. Leave it unset unless a push should publish both the Function App and the static website. The Functions deploy job can replace the working package, which currently includes the Linux Python dependencies the remote build did not install. The frontend job uploads `frontend/dist` to the `$web` container.
+
+The sections below are the original setup notes. The names above are the ones that were actually created.
+
+Use the Azure portal for the main path. Azure CLI commands are included where they save time. Resource names that Azure must keep unique need a suffix.
 
 Suggested names:
 
@@ -115,7 +178,7 @@ The CLI command also needs a Storage account because the Functions host uses it.
 
 4. Save. Restart the Function App if the portal asks you to.
 
-Also open the Function App **CORS** page and allow the Static Web App origin. During early testing you can allow `*` and tighten it later. Do not put the key in frontend settings.
+Also open the Function App **CORS** page and allow the real frontend origin. The current deployment allows the local dashboard origins listed at the top of this file. Do not use `*` as the platform CORS list. Do not put the key in frontend settings.
 
 CLI shape, without placing a real key in the repository:
 
@@ -156,28 +219,19 @@ https://<function-app>.azurewebsites.net/api/health
 
 If the response says it cannot connect to Cosmos DB, check the four environment variables and confirm the container partition key is `/location_id`.
 
-## 10. Create the Azure Static Web App
+## 10. Host the frontend on a Storage static website
 
-1. Search for **Static Web Apps** and select **Create**.
-2. Resource group: `rg-smart-traffic-dashboard`.
-3. Name: `stapp-smart-traffic-dashboard-<unique>`.
-4. Plan: Free, if available.
-5. Source: GitHub. Sign in and choose this repository and the `main` branch.
-6. Build presets: Custom.
-7. App location: `frontend`.
-8. Api location: leave empty. The API is the separate Function App.
-9. Output location: `dist`.
-10. Review and create.
+Azure Static Web Apps could not be deployed because the Azure for Students subscription restricts resource creation to regions that are not supported by Azure Static Web Apps. Therefore, Azure Storage Static Website hosting is used for the React frontend.
 
-If you prefer to deploy only after tests pass, skip the portal's automatic workflow and use the workflow already stored in `.github/workflows/azure-deploy.yml`.
+The website account for this project is `stsmarttrafficweb5414` in `rg-smart-traffic-dashboard`, Central India, Standard LRS. Static website hosting is enabled with `index.html` as both the index document and the error document. The built files from `frontend/dist` are uploaded to the `$web` container, with `index.html` at the root.
+
+Do not enable static website hosting on `stsmarttraffic5414`. That account belongs to the Function App.
 
 ## 11. Connect the GitHub repository
 
-1. Create the GitHub repository `smart-traffic-monitoring-analytics-dashboard` if it does not exist.
-2. Push the `main` branch.
-3. In the Static Web App, open **Manage deployment token** only when you are ready to store it as a GitHub secret.
+The repository is `https://github.com/sricharanreddy5414/smart-traffic-monitoring-analytics-dashboard` on branch `main`.
 
-The portal can add a workflow by itself. This repository already has `.github/workflows/azure-deploy.yml`. If the portal creates a second workflow file, keep one of them so two jobs do not deploy at the same time.
+This repository already has `.github/workflows/azure-deploy.yml`. Do not add a second workflow from the Azure portal.
 
 ## 12. Configure frontend environment variables
 
@@ -193,12 +247,13 @@ Also add these GitHub secrets:
 
 | Secret | Where to copy it from |
 | --- | --- |
-| `AZURE_STATIC_WEB_APPS_API_TOKEN` | Static Web App, Manage deployment token |
+| `AZURE_STORAGE_ACCOUNT` | Frontend storage account name |
+| `AZURE_STORAGE_KEY` | Storage account access key. Store it as a secret. Do not commit it |
 | `AZURE_FUNCTIONAPP_NAME` | The Function App name |
-| `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` | Function App, Get publish profile. Paste the whole file contents into the secret |
-| `VITE_API_BASE_URL` | `https://<function-app>.azurewebsites.net/api` |
+| `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` | Function App publish profile. Paste the whole file contents into the secret |
+| `VITE_API_BASE_URL` | `https://func-smart-traffic-dashboard.azurewebsites.net/api` |
 
-Then create a GitHub repository **variable** (not a secret) named `DEPLOY_TO_AZURE` and set it to `true`.
+The repository variable `DEPLOY_TO_AZURE` stays unset until a push should publish the Function App and the static website.
 
 ## 13. Deploy the frontend
 
@@ -206,9 +261,9 @@ Push to `main`, or run the **Build and Azure Deploy** workflow from the GitHub A
 
 1. Runs backend unit tests.
 2. Builds the frontend.
-3. If `DEPLOY_TO_AZURE` is `true`, publishes the Function App and the Static Web App.
+3. If `DEPLOY_TO_AZURE` is `true`, publishes the Function App and uploads the frontend to the Azure Storage static website.
 
-Open the Static Web App URL shown in the Azure portal.
+Open `https://stsmarttrafficweb5414.z29.web.core.windows.net/`.
 
 ## 14. Test the complete application
 
@@ -220,22 +275,25 @@ Open the Static Web App URL shown in the Azure portal.
 6. Stop the Function App and refresh the dashboard. The page should show `Unable to retrieve traffic data.` instead of a blank crash.
 7. Start the Function App again before the viva.
 
-## Record your resource names
+## Recorded resource names
 
-Fill this in after creation. Do not record keys here.
+Do not record keys here.
 
 | Resource | Final name | Region |
 | --- | --- | --- |
-| Resource group | | |
-| Cosmos DB account | | |
-| Function App | | |
-| Static Web App | | |
-| Static Web App URL | | |
-| Function App URL | | |
+| Resource group | `rg-smart-traffic-dashboard` | Central India |
+| Cosmos DB account | `cosmos-smart-traffic` | Central India |
+| Database / container | `TrafficDB` / `TrafficData` | Partition key `/location_id` |
+| Function App | `func-smart-traffic-dashboard` | Central India |
+| Function API URL | `https://func-smart-traffic-dashboard.azurewebsites.net/api` | |
+| Function App storage | `stsmarttraffic5414` | Central India |
+| Frontend storage account | `stsmarttrafficweb5414` | Central India |
+| Frontend URL | `https://stsmarttrafficweb5414.z29.web.core.windows.net/` | Static website |
+| Static Web App | Not created | Region policy blocks every Static Web Apps region |
 
 ## Cost and cleanup
 
-Serverless Cosmos DB, the Functions Consumption plan, and the Static Web Apps Free tier are reasonable for a short demo, but they are not a promise that the bill will be zero. A Cosmos DB account in provisioned throughput mode can cost more. Prefer serverless, and delete the resource group when the evaluation is over:
+These resources are running and can create charges: resource group `rg-smart-traffic-dashboard`, serverless Cosmos DB account `cosmos-smart-traffic`, Consumption Function App `func-smart-traffic-dashboard`, Function App storage `stsmarttraffic5414`, and frontend storage `stsmarttrafficweb5414`. There is no Static Web App. This is not a promise that the bill will be zero. When the evaluation is over, delete the whole resource group. That removes the database, the API, and both storage accounts. Do not delete other resource groups in the subscription:
 
 1. Open the resource group.
 2. Select **Delete resource group**.

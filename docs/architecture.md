@@ -10,10 +10,10 @@ Traffic data is simulated for academic demonstration. The architecture can later
 User
   |
   v
-React Dashboard
+Azure Storage Static Website
   |
   v
-Azure Static Web Apps
+React/Vite Dashboard
   |
   v
 Azure Functions
@@ -21,30 +21,28 @@ Azure Functions
   v
 Azure Cosmos DB
   |
-  v
-Traffic Data
+  +----> Traffic Data
   |
-  v
-Analytics Engine
+  +----> Analytics
   |
   +----> Congestion Calculation
-  |
-  +----> Traffic Trends
   |
   +----> Short-Term Prediction
   |
   v
-Dashboard Visualization
+Dashboard
 ```
 
-Locally, the same Functions API runs with `func start`. If Cosmos DB credentials are empty, the API writes to `backend/.local_data/traffic_store.json`. That file is created from `data/sample_traffic_data.json`. It is a local development store, not a fake success response from Cosmos DB.
+Azure Static Web Apps could not be deployed because the Azure for Students subscription restricts resource creation to regions that are not supported by Azure Static Web Apps. Therefore, Azure Storage Static Website hosting is used for the React frontend.
+
+The public site is `https://stsmarttrafficweb5414.z29.web.core.windows.net/`. It calls `https://func-smart-traffic-dashboard.azurewebsites.net/api`. Locally, the same Functions API runs with `func start`. If Cosmos DB credentials are empty, the API writes to `backend/.local_data/traffic_store.json`. That file is created from `data/sample_traffic_data.json`. It is a local development store, not a fake success response from Cosmos DB.
 
 ## Components
 
 | Component | Responsibility |
 | --- | --- |
 | React dashboard | Calls the API and draws cards, charts, the table, the map, and the prediction |
-| Azure Static Web Apps | Hosts the built React files |
+| Azure Storage static website | Hosts the built React files at `stsmarttrafficweb5414` |
 | Azure Functions | HTTP API in Python |
 | Azure Cosmos DB | Stores one document per traffic reading |
 | Analytics modules | Congestion, summaries, moving average, and simulation |
@@ -81,7 +79,7 @@ Routes:
 
 ## Database flow
 
-Cosmos DB account, suggested name `cosmos-smart-traffic-<unique>`.
+Cosmos DB account `cosmos-smart-traffic`, in Central India, serverless.
 
 - Database: `TrafficDB`
 - Container: `TrafficData`
@@ -123,8 +121,9 @@ Example: 450 vehicles and a capacity of 600 gives 75 percent, so the status is H
 | Resource group | Holds the project resources so they can be deleted together |
 | Cosmos DB | Document store for traffic readings |
 | Functions | Serverless HTTP API |
-| Static Web Apps | Hosts the React build |
+| Storage account `stsmarttrafficweb5414` | Static website for the React build |
+| Storage account `stsmarttraffic5414` | Required by the Function App host. Static website hosting is not enabled on this account |
 | GitHub | Source control |
-| GitHub Actions | Build, test, and optional deploy |
+| GitHub Actions | Runs tests and the frontend build. Deploy jobs stay off until `DEPLOY_TO_AZURE` is set |
 
 No Kubernetes cluster, message bus, or separate machine learning service is used.

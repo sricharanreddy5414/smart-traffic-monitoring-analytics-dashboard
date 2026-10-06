@@ -22,7 +22,7 @@ Urban traffic congestion increases due to inefficient monitoring and lack of pre
 - Calculate congestion, summary analytics, and a moving-average prediction.
 - Show the results on a React dashboard.
 - Simulate a new reading during a viva or project evaluation.
-- Deploy the frontend with Azure Static Web Apps and the backend with Azure Functions.
+- Deploy the frontend with an Azure Storage static website and the backend with Azure Functions.
 - Keep the source in GitHub and build it with GitHub Actions.
 
 ## Features
@@ -45,7 +45,7 @@ Urban traffic congestion increases due to inefficient monitoring and lack of pre
 | Frontend | React, Vite, JavaScript, HTML, CSS, Recharts |
 | Backend | Python, Azure Functions |
 | Database | Azure Cosmos DB |
-| Frontend hosting | Azure Static Web Apps |
+| Frontend hosting | Azure Storage static website |
 | Source control | GitHub |
 | CI/CD | GitHub Actions |
 
@@ -55,10 +55,10 @@ Urban traffic congestion increases due to inefficient monitoring and lack of pre
 User
   |
   v
-React Dashboard
+Azure Storage Static Website
   |
   v
-Azure Static Web Apps
+React/Vite Dashboard
   |
   v
 Azure Functions
@@ -66,19 +66,19 @@ Azure Functions
   v
 Azure Cosmos DB
   |
-  v
-Traffic Data
+  +--> Traffic Data
   |
-  v
-Analytics Engine
+  +--> Analytics
   |
   +--> Congestion Calculation
-  +--> Traffic Trends
+  |
   +--> Short-Term Prediction
   |
   v
-Dashboard Visualization
+Dashboard
 ```
+
+Azure Static Web Apps could not be deployed because the Azure for Students subscription restricts resource creation to regions that are not supported by Azure Static Web Apps. Therefore, Azure Storage Static Website hosting is used for the React frontend.
 
 For local development, the React app calls `http://localhost:7071/api`. If Cosmos DB settings are empty, Azure Functions stores readings in a local JSON file instead. See [docs/architecture.md](docs/architecture.md).
 
@@ -111,16 +111,24 @@ Example: vehicle counts 400, 430, 450, 470, and 460 average to 442. The API retu
 
 ## Azure services
 
-Suggested resources. Names that must be globally unique need a suffix such as your initials. These resources are not created until you follow [docs/azure-deployment.md](docs/azure-deployment.md).
+These resources are deployed in the Azure for Students subscription, in Central India. Details and the Static Web Apps limit are in [docs/azure-deployment.md](docs/azure-deployment.md).
 
-| Resource | Suggested name |
+| Resource | Name |
 | --- | --- |
 | Resource group | `rg-smart-traffic-dashboard` |
-| Cosmos DB account | `cosmos-smart-traffic-<unique>` |
-| Function App | `func-smart-traffic-dashboard-<unique>` |
-| Static Web App | `stapp-smart-traffic-dashboard-<unique>` |
+| Cosmos DB account | `cosmos-smart-traffic` |
+| Database | `TrafficDB` |
+| Container | `TrafficData` |
+| Partition key | `/location_id` |
+| Function App | `func-smart-traffic-dashboard` |
+| API | `https://func-smart-traffic-dashboard.azurewebsites.net/api` |
+| Frontend storage account | `stsmarttrafficweb5414` |
+| Public website | `https://stsmarttrafficweb5414.z29.web.core.windows.net/` |
+| Function App storage | `stsmarttraffic5414` |
 
-Cosmos DB database: `TrafficDB`. Container: `TrafficData`. Partition key: `/location_id`.
+`stsmarttraffic5414` exists because the Function App host requires it. The public website uses the separate account `stsmarttrafficweb5414`.
+
+Azure Static Web Apps could not be deployed because the Azure for Students subscription restricts resource creation to regions that are not supported by Azure Static Web Apps. Therefore, Azure Storage Static Website hosting is used for the React frontend.
 
 ## Project structure
 
@@ -173,7 +181,7 @@ python -m unittest discover -s tests -v
 
 Deployment requires your own Azure subscription. The steps are in [docs/azure-deployment.md](docs/azure-deployment.md). Do not paste keys into chat or commit them.
 
-After the demo, delete the resource group if you no longer need it. Cosmos DB, Functions, and Static Web Apps can create charges. Do not assume every service stays free.
+After the demo, delete the resource group `rg-smart-traffic-dashboard` if you no longer need it. Cosmos DB, Functions, and the storage accounts can create charges. Do not assume every service stays free.
 
 ## GitHub setup
 
@@ -211,12 +219,21 @@ GitHub Actions secrets, stored in the repository settings and not in files:
 
 | Name | Purpose |
 | --- | --- |
-| `AZURE_STATIC_WEB_APPS_API_TOKEN` | Static Web Apps deployment token |
 | `AZURE_FUNCTIONAPP_NAME` | Function App name |
 | `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` | Function App publish profile |
+| `AZURE_STORAGE_ACCOUNT` | Frontend storage account name |
+| `AZURE_STORAGE_KEY` | Key used only to upload the static website |
 | `VITE_API_BASE_URL` | Public Functions URL used while building the frontend |
 
-Create a repository variable named `DEPLOY_TO_AZURE` and set it to `true` only after those secrets exist. Until then, GitHub Actions runs tests and the frontend build, and skips deployment.
+These GitHub Actions secrets are stored for this repository. Their values are not in the source:
+
+- `AZURE_FUNCTIONAPP_NAME`
+- `AZURE_FUNCTIONAPP_PUBLISH_PROFILE`
+- `AZURE_STORAGE_ACCOUNT`
+- `AZURE_STORAGE_KEY`
+- `VITE_API_BASE_URL`
+
+Leave the repository variable `DEPLOY_TO_AZURE` unset. The workflow still runs tests and the frontend build. It skips both deploy jobs until that variable is `true`. The frontend job uploads `frontend/dist` to the `$web` container. The Functions job can replace the working API package, so turn the variable on only when that redeploy is intended.
 
 ## API endpoints
 
@@ -245,7 +262,7 @@ Test cases for the dashboard, APIs, congestion, simulation, prediction, and erro
 6. Show the vehicle counts, charts, and status badges change.
 7. Show the analytics cards, including the busiest and highest-congestion locations.
 8. Show **Short-Term Traffic Prediction** and say the method is a moving average.
-9. Explain the path: browser, Static Web Apps, Functions, Cosmos DB.
+9. Explain the path: browser, Azure Storage static website, React dashboard, Azure Functions, Azure Cosmos DB.
 10. Open the GitHub repository and, after deployment, the Azure resource group.
 
 Say clearly that the readings are simulated for the academic demo.
@@ -256,7 +273,7 @@ Say clearly that the readings are simulated for the academic demo.
 - Prediction is a moving average, not machine learning.
 - The API reads the whole Cosmos container. That is acceptable for this small dataset.
 - Authentication is intentionally simple. The college demo uses anonymous HTTP functions.
-- Azure resources are not created by this repository until you deploy them with your account.
+- The public dashboard is an Azure Storage static website. Azure Static Web Apps could not be deployed because the Azure for Students subscription restricts resource creation to regions that are not supported by Azure Static Web Apps.
 
 ## Future enhancements
 
