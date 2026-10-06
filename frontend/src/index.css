@@ -1,0 +1,440 @@
+:root {
+  color: #1c2833;
+  background: #eef2f5;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  line-height: 1.45;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #eef2f5;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.page {
+  min-height: 100vh;
+}
+
+.header {
+  background: #0b3a5b;
+  color: #f7fbff;
+  padding: 28px 7vw 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #c5d7e6;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 650;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  font-size: 18px;
+  color: #d7e6f2;
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.badge {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.badge-live {
+  background: #1f7a4d;
+  border-color: #1f7a4d;
+}
+
+.header-note {
+  margin: 14px 0 0;
+  color: #d5e4ef;
+  font-size: 14px;
+}
+
+main {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 20px 0 48px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.btn-primary {
+  background: #0b3a5b;
+  color: white;
+}
+
+.btn-secondary {
+  background: white;
+  color: #0b3a5b;
+  border-color: #b7c6d3;
+}
+
+.auto-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+.summary-card,
+.panel,
+.state-box {
+  background: white;
+  border: 1px solid #d8e1e8;
+  border-radius: 12px;
+}
+
+.summary-card {
+  padding: 14px 16px;
+}
+
+.summary-label {
+  margin: 0;
+  color: #5c6b7a;
+  font-size: 13px;
+}
+
+.summary-value {
+  margin: 8px 0 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0b3a5b;
+}
+
+.summary-detail {
+  margin: 4px 0 0;
+  color: #5c6b7a;
+  font-size: 12px;
+}
+
+.insight {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.insight p {
+  margin: 0;
+  background: white;
+  border: 1px solid #d8e1e8;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 12px;
+}
+
+.panel {
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.panel-heading h2,
+.distribution h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.panel-heading p,
+.method-line,
+.footer,
+.empty-copy {
+  color: #5c6b7a;
+}
+
+.panel-heading p {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
+.chart-box {
+  height: 320px;
+  margin-top: 12px;
+}
+
+.chart-box-short {
+  height: 220px;
+}
+
+.split-charts {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.distribution-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.distribution-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.method-line {
+  margin: 12px 0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e4ebf0;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+th {
+  color: #3e5160;
+  background: #f7fafc;
+}
+
+.status {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-low {
+  background: #e5f6ed;
+  color: #1f7a4d;
+}
+
+.status-medium {
+  background: #fff6d8;
+  color: #8a6a00;
+}
+
+.status-high {
+  background: #fff0e0;
+  color: #b85c00;
+}
+
+.status-critical {
+  background: #fde8e8;
+  color: #a32020;
+}
+
+.city-map {
+  position: relative;
+  height: 460px;
+  margin-top: 12px;
+  border-radius: 12px;
+  background:
+    linear-gradient(rgba(11, 58, 91, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 58, 91, 0.05) 1px, transparent 1px),
+    #e7f1ea;
+  background-size: 40px 40px, 40px 40px, auto;
+  border: 1px solid #c9d8cc;
+}
+
+.north,
+.city-name {
+  position: absolute;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0b3a5b;
+}
+
+.north {
+  top: 10px;
+  left: 12px;
+}
+
+.city-name {
+  right: 12px;
+  bottom: 10px;
+}
+
+.pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.pin-low .pin-dot {
+  background: #1f7a4d;
+}
+
+.pin-medium .pin-dot {
+  background: #e0b400;
+}
+
+.pin-high .pin-dot {
+  background: #d46a00;
+}
+
+.pin-critical .pin-dot {
+  background: #c0392b;
+}
+
+.pin-card {
+  background: white;
+  border: 1px solid #d5dee6;
+  border-radius: 8px;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+}
+
+.state-box {
+  padding: 28px 20px;
+  text-align: center;
+}
+
+.state-error {
+  border-color: #e7b4b4;
+  background: #fff6f6;
+}
+
+.error-banner {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #fff6f6;
+  border: 1px solid #e7b4b4;
+  color: #8d1d1d;
+}
+
+.footer {
+  margin-top: 20px;
+  font-size: 13px;
+}
+
+.footer p {
+  margin: 4px 0;
+}
+
+@media (max-width: 1000px) {
+  .summary-grid,
+  .insight,
+  .two-col,
+  .split-charts {
+    grid-template-columns: 1fr;
+  }
+
+  .header h1 {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 640px) {
+  .header {
+    padding: 22px 16px;
+  }
+
+  main {
+    width: min(100% - 20px, 1180px);
+  }
+
+  .summary-value {
+    font-size: 24px;
+  }
+
+  .city-map {
+    height: 540px;
+  }
+}
